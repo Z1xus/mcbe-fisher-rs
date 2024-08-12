@@ -1,0 +1,30 @@
+[package]
+name = "mcbe-fisher-rs"
+version = "0.1.0"
+edition = "2021"
+authors = ["z1xus"]
+license = "GPL-3.0"
+description = "A fishing bot for Minecraft Bedrock Edition"
+repository = "https://github.com/z1xus/mcbe-fisher-rs"
+readme = "README"
+
+[dependencies]
+eframe = "0.28.1"
+egui = "0.28.1"
+rdev = "0.5.3"
+winapi = { version = "0.3.9", features = ["processthreadsapi", "memoryapi", "handleapi", "psapi"] }
+parking_lot = "0.12.3"
+image = "0.25.2"
+
+[build-dependencies]
+embed-resource = "2.4.3"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev]
+opt-level = 1
