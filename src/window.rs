@@ -214,8 +214,16 @@ impl eframe::App for FisherUi {
                             ui.add_space(5.0);
                             ui.horizontal(|ui| {
                                 ui.add_space(10.0);
-                                ui.radio_value(&mut self.casts, -1, RichText::new("Infinite").size(14.0));
-                                ui.radio_value(&mut self.casts, 0, RichText::new("Custom").size(14.0));
+                                ui.radio_value(
+                                    &mut self.casts,
+                                    -1,
+                                    RichText::new("Infinite").size(14.0),
+                                );
+                                ui.radio_value(
+                                    &mut self.casts,
+                                    0,
+                                    RichText::new("Custom").size(14.0),
+                                );
                             });
 
                             if self.casts == 0 {
@@ -250,7 +258,9 @@ impl eframe::App for FisherUi {
                             ui.add_space(10.0);
                             ui.horizontal(|ui| {
                                 ui.add_space(10.0);
-                                ui.label(RichText::new("The delay before reeling the rod in").size(12.0));
+                                ui.label(
+                                    RichText::new("The delay before reeling the rod in").size(12.0),
+                                );
                             });
                             ui.add_space(15.0);
                         });
