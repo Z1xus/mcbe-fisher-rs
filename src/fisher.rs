@@ -86,6 +86,7 @@ impl Fisher {
         let mut peak_value = 0;
         let mut last_value = 0;
         let mut falling_count = 0;
+        let mut stable_count = 0;
         let mut post_peak_count = 0;
         let start_time = Instant::now();
 
@@ -102,6 +103,7 @@ impl Fisher {
                     &mut peak_value,
                     &mut last_value,
                     &mut falling_count,
+                    &mut stable_count,
                     &mut post_peak_count,
                     threshold,
                 );
@@ -129,6 +131,7 @@ impl Fisher {
         peak_value: &mut u32,
         last_value: &mut u32,
         falling_count: &mut u32,
+        stable_count: &mut u32,
         post_peak_count: &mut u32,
         threshold: u32,
     ) -> FishingState {
@@ -146,6 +149,7 @@ impl Fisher {
                 peak_value,
                 last_value,
                 falling_count,
+                stable_count,
                 post_peak_count,
                 threshold,
             ),
@@ -159,16 +163,30 @@ impl Fisher {
         peak_value: &mut u32,
         last_value: &mut u32,
         falling_count: &mut u32,
+        stable_count: &mut u32,
         post_peak_count: &mut u32,
         threshold: u32,
     ) -> FishingState {
+        const STABILITY_THRESHOLD: u32 = 3;
+        const MIN_PEAK_VALUE: u32 = 5;
+
         if current_value > *peak_value {
             *peak_value = current_value;
             *falling_count = 0;
+            *stable_count = 0;
             *post_peak_count = 0;
         } else if current_value < *last_value {
             *falling_count += 1;
-            if *falling_count > 2 && *peak_value > 2 {
+            *stable_count = 0;
+            if *falling_count > 2 && *peak_value >= MIN_PEAK_VALUE {
+                *post_peak_count += 1;
+                if *post_peak_count > threshold {
+                    return FishingState::Reeling;
+                }
+            }
+        } else if current_value == *last_value {
+            *stable_count += 1;
+            if *stable_count >= STABILITY_THRESHOLD && *peak_value >= MIN_PEAK_VALUE {
                 *post_peak_count += 1;
                 if *post_peak_count > threshold {
                     return FishingState::Reeling;
@@ -176,6 +194,7 @@ impl Fisher {
             }
         } else {
             *falling_count = 0;
+            *stable_count = 0;
         }
         *last_value = current_value;
         FishingState::WaitingForBite
