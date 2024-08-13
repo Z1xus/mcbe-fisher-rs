@@ -20,6 +20,7 @@ pub struct FisherUi {
     stop_sender: Option<Sender<()>>,
     stop_receiver: Option<Receiver<()>>,
     game_running: bool,
+    version: String,
 }
 
 impl FisherUi {
@@ -35,6 +36,7 @@ impl FisherUi {
             stop_sender: None,
             stop_receiver: None,
             game_running: false,
+            version: env!("CARGO_PKG_VERSION").to_string(),
         }
     }
 
@@ -42,7 +44,7 @@ impl FisherUi {
         let icon_path = format!("{}/resources/icon.png", env!("CARGO_MANIFEST_DIR"));
         let icon_data = load_icon(&icon_path);
         let mut viewport = egui::ViewportBuilder::default()
-            .with_inner_size([350.0, 480.0])
+            .with_inner_size([350.0, 490.0])
             .with_resizable(false);
 
         if let Some(icon) = icon_data {
@@ -238,6 +240,11 @@ impl eframe::App for FisherUi {
                 });
 
                 ui.add_space(25.0);
+
+                ui.with_layout(egui::Layout::bottom_up(egui::Align::Center), |ui| {
+                    ui.add_space(10.0);
+                    ui.label(RichText::new(format!("version {}", self.version)).size(12.0));
+                });
             });
         });
 
