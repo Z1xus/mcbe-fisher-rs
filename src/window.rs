@@ -4,7 +4,7 @@ use image::ImageReader;
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::Arc;
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use crate::fisher::Fisher;
 use crate::memory::{get_pid, MemoryReader};
@@ -21,6 +21,8 @@ pub struct FisherUi {
     stop_receiver: Option<Receiver<()>>,
     game_running: bool,
     version: String,
+    start_time: Option<Instant>,
+    countdown: i32,
 }
 
 impl FisherUi {
@@ -37,6 +39,8 @@ impl FisherUi {
             stop_receiver: None,
             game_running: false,
             version: env!("CARGO_PKG_VERSION").to_string(),
+            start_time: None,
+            countdown: 5,
         }
     }
 
@@ -83,6 +87,9 @@ impl FisherUi {
                 let (tx, rx) = channel();
                 self.stop_sender = Some(tx.clone());
                 self.stop_receiver = Some(rx);
+
+                self.start_time = Some(Instant::now());
+                self.countdown = 5;
 
                 self.fishing_thread = Some(thread::spawn(move || {
                     fisher.run(casts, threshold, tx);
@@ -166,7 +173,18 @@ impl eframe::App for FisherUi {
                 let button_text = if !self.game_running {
                     RichText::new("Start your game").size(18.0)
                 } else if self.is_fishing {
-                    RichText::new("Stop Fishing").size(18.0)
+                    if let Some(start_time) = self.start_time {
+                        let elapsed = start_time.elapsed().as_secs() as i32;
+                        if elapsed < 5 {
+                            self.countdown = 5 - elapsed;
+                            RichText::new(format!("Starting in {}s...", self.countdown)).size(18.0)
+                        } else {
+                            self.start_time = None;
+                            RichText::new("Stop Fishing").size(18.0)
+                        }
+                    } else {
+                        RichText::new("Stop Fishing").size(18.0)
+                    }
                 } else {
                     RichText::new("Start Fishing").size(18.0)
                 };
